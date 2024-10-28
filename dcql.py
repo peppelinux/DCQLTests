@@ -66,6 +66,7 @@ def match_credental(credential, credential_store):
                 matched_claim_names = []
 
                 for claim in claims:
+                    claim_values = None if 'values' not in claim else claim['values']
                     # Matching logic is peformed on a per-format basis. This is a bit annoying
                     if format == 'mso_mdoc':
                         namespace = None if 'namespace' not in claim else claim['namespace']
@@ -76,7 +77,13 @@ def match_credental(credential, credential_store):
                             raise RuntimeError('claim_name missing from an mso-mdoc claim')
                         if namespace in candidate['namespaces']:
                             if claim_name in candidate['namespaces'][namespace]:
-                                matched_claim_names.append(candidate['namespaces'][namespace][claim_name]['display'])
+                                if claim_values is not None:
+                                    for v in claim_values:
+                                        if v == candidate['namespaces'][namespace][claim_name]['value']:
+                                            matched_claim_names.append(candidate['namespaces'][namespace][claim_name]['display'])
+                                            break
+                                else:
+                                    matched_claim_names.append(candidate['namespaces'][namespace][claim_name]['display'])
 
                 matched_credential['matched_claim_names'] = matched_claim_names
 
@@ -90,6 +97,7 @@ def match_credental(credential, credential_store):
                 matched_claim_ids = {}
 
                 for claim in claims:
+                    claim_values = None if 'values' not in claim else claim['values']
                     claim_id = None if 'id' not in claim else claim['id']
                     if claim_id is None:
                         raise RuntimeError('claim is missing ID when claim_set is present')
@@ -104,7 +112,13 @@ def match_credental(credential, credential_store):
                             raise RuntimeError('claim_name missing from an mso-mdoc claim')
                         if namespace in candidate['namespaces']:
                             if claim_name in candidate['namespaces'][namespace]:
-                                matched_claim_ids[claim_id] = candidate['namespaces'][namespace][claim_name]['display']
+                                if claim_values is not None:
+                                    for v in claim_values:
+                                        if v == candidate['namespaces'][namespace][claim_name]['value']:
+                                            matched_claim_ids[claim_id] = candidate['namespaces'][namespace][claim_name]['display']
+                                            break
+                                else:
+                                    matched_claim_ids[claim_id] = candidate['namespaces'][namespace][claim_name]['display']
 
                 for claim_set in claim_sets:
                     matched_claim_names = []

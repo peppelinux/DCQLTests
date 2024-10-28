@@ -1,0 +1,79 @@
+{
+    "name": "mdoc query with claim sets and value matching",
+    "description": "mdoc query with claim sets",
+    "dcql_query": {
+        "credentials": [
+            {
+                "id": "mDL_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "org.iso.18013.5.1.mDL"
+                },
+                "claims": [
+                    {
+                        "id": "family_name",
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "family_name"
+                    },
+                    {
+                        "id": "given_name",
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "given_name",
+                        "values": [
+                            "Clark",
+                            "Peter"
+                        ]
+                    },
+                    {
+                        "id": "age_over_21",
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "age_over_21"
+                    },
+                    {
+                        "id": "age_over_18",
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "age_over_18"
+                    }
+                ],
+                "claim_sets": [
+                    [
+                        "family_name",
+                        "given_name",
+                        "age_over_18"
+                    ],
+                    [
+                        "family_name",
+                        "given_name",
+                        "age_over_21"
+                    ],
+                    [
+                        "family_name",
+                        "given_name"
+                    ]
+                ]
+            }
+        ]
+    },
+    "expected_result": {
+        "matched_credentials": {
+            "mDL_request": [
+                {
+                    "id": "2",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name",
+                        "Age Over 21"
+                    ]
+                },
+                {
+                    "id": "3",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name",
+                        "Age Over 18"
+                    ]
+                }
+            ]
+        }
+    }
+}
