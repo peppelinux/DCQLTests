@@ -1,0 +1,52 @@
+{
+    "name": "Simple mdoc query",
+    "description": "Simple single document ISO mDL query",
+    "dcql_query": {
+        "credentials": [
+            {
+                "id": "mDL_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "org.iso.18013.5.1.mDL"
+                },
+                "claims": [
+                    {
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "family_name"
+                    },
+                    {
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "given_name"
+                    }
+                ]
+            }
+        ]
+    },
+    "expected_result": {
+        "matched_credentials": {
+            "mDL_request": [
+                {
+                    "id": "1",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name"
+                    ]
+                },
+                {
+                    "id": "2",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name"
+                    ]
+                },
+                {
+                    "id": "3",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name"
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "name": "Single document no claims",
+    "description": "A single mso_mdoc query with no claims",
+    "dcql_query": {
+        "credentials": [
+            {
+                "id": "mDL_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "org.iso.18013.5.1.mDL"
+                }
+            }
+        ]
+    },
+    "expected_result": {
+        "matched_credentials": {
+            "mDL_request": [
+                {
+                    "id": "1",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name",
+                        "Age Over 21"
+                    ]
+                },
+                {
+                    "id": "2",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name",
+                        "Age Over 21"
+                    ]
+                },
+                {
+                    "id": "3",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name",
+                        "Age Over 18"
+                    ]
+                }
+            ]
+        }
+    }
+}
