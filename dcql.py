@@ -138,7 +138,7 @@ def dcql_query(query, credential_store):
     credential_sets = None if "credential_sets" not in query else query["credential_sets"]
     if credentials is None:
         raise RuntimeError("credentials missing")
-    
+
     for credential in credentials:
         id = None if "id" not in credential else credential["id"]
         if id is None:
