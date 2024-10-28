@@ -1,6 +1,5 @@
 {
     "name": "Simple mdoc query with value matching",
-    "description": "Simple single document ISO mDL query",
     "dcql_query": {
         "credentials": [
             {

@@ -1,6 +1,5 @@
 {
     "name": "mdoc query with claim sets and value matching",
-    "description": "mdoc query with claim sets",
     "dcql_query": {
         "credentials": [
             {

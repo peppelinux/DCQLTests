@@ -20,13 +20,13 @@ def main():
         print('Running test: {}'.format(test['name']))
 
         matched_credentials = dcql.dcql_query(test['dcql_query'], credential_store['credentials'])
-        expected_result = test['expected_result']['matched_credentials'] 
+        expected_result = test['expected_result']['matched_credentials']
+        print('Matched : {}'.format(json.dumps(matched_credentials, indent=None)))
         if expected_result == matched_credentials:
             print('PASS')
         else:
+            print('Expected: {}'.format(json.dumps(expected_result)))
             print('FAIL')
-        #print('Matched : {}'.format(json.dumps(matched_credentials)))
-        #print('Expected: {}'.format(expected_result))
-
+        
 if __name__ == '__main__':
     main()

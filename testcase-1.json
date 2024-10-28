@@ -1,6 +1,5 @@
 {
     "name": "Single document no claims",
-    "description": "A single mso_mdoc query with no claims",
     "dcql_query": {
         "credentials": [
             {

@@ -1,5 +1,5 @@
 {
-    "name": "mdoc query with claim sets",
+    "name": "Simple multi document mdoc query",
     "dcql_query": {
         "credentials": [
             {
@@ -10,41 +10,30 @@
                 },
                 "claims": [
                     {
-                        "id": "family_name",
                         "namespace": "org.iso.18013.5.1",
                         "claim_name": "family_name"
                     },
                     {
-                        "id": "given_name",
                         "namespace": "org.iso.18013.5.1",
                         "claim_name": "given_name"
-                    },
-                    {
-                        "id": "age_over_21",
-                        "namespace": "org.iso.18013.5.1",
-                        "claim_name": "age_over_21"
-                    },
-                    {
-                        "id": "age_over_18",
-                        "namespace": "org.iso.18013.5.1",
-                        "claim_name": "age_over_18"
                     }
-                ],
-                "claim_sets": [
-                    [
-                        "family_name",
-                        "given_name",
-                        "age_over_18"
-                    ],
-                    [
-                        "family_name",
-                        "given_name",
-                        "age_over_21"
-                    ],
-                    [
-                        "family_name",
-                        "given_name"
-                    ]
+                ]
+            },
+            {
+                "id": "boardingpass_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "com.test.boardingpass"
+                },
+                "claims": [
+                    {
+                        "namespace": "com.test.boardingpass.v1",
+                        "claim_name": "family_name"
+                    },
+                    {
+                        "namespace": "com.test.boardingpass.v1",
+                        "claim_name": "booking_number"
+                    }
                 ]
             }
         ]
@@ -56,24 +45,30 @@
                     "id": "1",
                     "matched_claim_names": [
                         "Family Name",
-                        "Given Name",
-                        "Age Over 21"
+                        "Given Name"
                     ]
                 },
                 {
                     "id": "2",
                     "matched_claim_names": [
                         "Family Name",
-                        "Given Name",
-                        "Age Over 21"
+                        "Given Name"
                     ]
                 },
                 {
                     "id": "3",
                     "matched_claim_names": [
                         "Family Name",
-                        "Given Name",
-                        "Age Over 18"
+                        "Given Name"
+                    ]
+                }
+            ],
+            "boardingpass_request": [
+                {
+                    "id": "4",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Booking Number"
                     ]
                 }
             ]
