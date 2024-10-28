@@ -133,18 +133,48 @@ def match_credental(credential, credential_store):
 
 def dcql_query(query, credential_store):
     matched_credentials = {}
-
-    if "credentials" not in query:
+    candidate_matched_credentials = {}
+    credentials = None if "credentials" not in query else query["credentials"]
+    credential_sets = None if "credential_sets" not in query else query["credential_sets"]
+    if credentials is None:
         raise RuntimeError("credentials missing")
-    credentials = query["credentials"]
-
+    
     for credential in credentials:
         id = None if "id" not in credential else credential["id"]
         if id is None:
             raise RuntimeError("id missing from credential")
-
         matched = match_credental(credential, credential_store)
-        matched_credentials[id] = matched
-        continue
+        if len(matched) > 0:
+            candidate_matched_credentials[id] = matched
+
+    if credential_sets is None:
+        if len(credentials) == len(candidate_matched_credentials.keys()):
+            matched_credentials = candidate_matched_credentials
+    else:
+        matched_credential_set = {}
+        matched_credential_set_optional = {}
+        required_count = 0
+        for credential_set in credential_sets:
+            options = None if "options" not in credential_set else credential_set["options"]
+            if options is None:
+                raise RuntimeError("options missing from credential_set")
+            required = True if "required" not in credential_set else credential_set["required"]
+            if required:
+                required_count = required_count + 1
+            for option in options:
+                matched_options = []
+                for cred in option:
+                    if cred in candidate_matched_credentials:
+                        matched_options.append(cred)
+                if len(matched_options) == len(option):
+                    # This option matched
+                    for m in matched_options:
+                        if required:
+                            matched_credential_set[m] = candidate_matched_credentials[m]
+                        else:
+                            matched_credential_set_optional[m] = candidate_matched_credentials[m]
+                    break
+        if required_count == len(matched_credential_set.keys()):
+            matched_credentials = matched_credential_set | matched_credential_set_optional
 
     return matched_credentials

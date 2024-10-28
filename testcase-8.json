@@ -1,0 +1,98 @@
+{
+    "name": "Multi document mdoc query with credential_sets",
+    "dcql_query": {
+        "credentials": [
+            {
+                "id": "mDL_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "org.iso.18013.5.1.mDL"
+                },
+                "claims": [
+                    {
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "family_name"
+                    },
+                    {
+                        "namespace": "org.iso.18013.5.1",
+                        "claim_name": "given_name"
+                    }
+                ]
+            },
+            {
+                "id": "boardingpass_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "com.test.boardingpass"
+                },
+                "claims": [
+                    {
+                        "namespace": "com.test.boardingpass.v1",
+                        "claim_name": "family_name"
+                    },
+                    {
+                        "namespace": "com.test.boardingpass.v1",
+                        "claim_name": "booking_number"
+                    }
+                ]
+            },
+            {
+                "id": "passport_request",
+                "format": "mso_mdoc",
+                "meta": {
+                    "doctype_value": "com.test.passport"
+                },
+                "claims": [
+                    {
+                        "namespace": "com.test.passport.v1",
+                        "claim_name": "family_name"
+                    },
+                    {
+                        "namespace": "com.test.passport.v1",
+                        "claim_name": "given_name"
+                    }
+                ]
+            }
+        ],
+        "credential_sets": [
+            {
+                "purpose": "Identification",
+                "options": [
+                    [
+                        "mDL_request"
+                    ],
+                    [
+                        "passport_request"
+                    ]
+                ]
+            }
+        ]
+    },
+    "expected_result": {
+        "matched_credentials": {
+            "mDL_request": [
+                {
+                    "id": "1",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name"
+                    ]
+                },
+                {
+                    "id": "2",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name"
+                    ]
+                },
+                {
+                    "id": "3",
+                    "matched_claim_names": [
+                        "Family Name",
+                        "Given Name"
+                    ]
+                }
+            ]
+        }
+    }
+}

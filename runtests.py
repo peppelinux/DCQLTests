@@ -10,9 +10,14 @@ def load_json(path):
     with open(path) as f:
         return json.load(f)
 
+def get_case_num(case):
+    filename = os.path.basename(case)
+    case_num = int(filename.lstrip("testcase-").rstrip(".json"))
+    return case_num
+
 def main():
     test_cases = get_test_cases(os.getcwd())
-    test_cases.sort()
+    test_cases.sort(key=lambda x:get_case_num(x))
     print(test_cases)
     credential_store = load_json('credentials.json')
     for test_path in test_cases:
