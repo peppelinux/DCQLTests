@@ -4,12 +4,16 @@ import json
 import os
 import logging
 
+from logger_formatter import CustomFormatter
+
 logging.basicConfig(
     level=logging.INFO,
     format="[%(levelname)s] %(message)s"
 )
 logger = logging.getLogger(__name__)
-
+# ch = logging.StreamHandler()
+# ch.setFormatter(CustomFormatter())
+# logger.addHandler(ch)
 
 def get_test_cases(path):
     return [
