@@ -1,24 +1,26 @@
+_required_in_credential = {
+    "id": None,
+    "format": None
+}
+
 def match_credental(credential, credential_store):
     matched_credentials = []
 
-    # Check for required params
-    if "id" not in credential:
-        raise RuntimeError("id missing from credential")
-    if "format" not in credential:
-        raise RuntimeError("format missing from credential")
-    id = credential["id"]
-    format = credential["format"]
+    for _item in _required_in_credential:
+        if _item not in credential: 
+            raise RuntimeError(f"{_item} missing from credential")
+        _required_in_credential[_item] = credential.get(_item)
 
     # check for optional params
-    meta = None if "meta" not in credential else credential["meta"]
-    claims = None if "claims" not in credential else credential["claims"]
-    claim_sets = None if "claim_sets" not in credential else credential["claim_sets"]
+    meta = credential.get("meta", None)
+    claims = credential.get("claims", None)
+    claim_sets = credential.get("claim_sets", None)
 
     if claims is None and claim_sets is not None:
         raise RuntimeError("claim_set without claims")
 
     # Filter by format
-    candidates = None if format not in credential_store else credential_store[format]
+    candidates = credential_store.get(_required_in_credential["format"], None)
     # Bail if there are no credentials matching this format
     if candidates is None:
         return matched_credentials
@@ -26,12 +28,12 @@ def match_credental(credential, credential_store):
     # Filter by meta
     if meta is not None:
         # meta is intpreted on a per-format basis
-        if format == "mso_mdoc":
+        if _required_in_credential["format"] == "mso_mdoc":
             # Check for a doctype
-            doctype_value = None if "doctype_value" not in meta else meta["doctype_value"]
+            doctype_value = meta.get("doctype_value", None)
             if doctype_value is not None:
                 # Filter by doctype
-                candidates = None if doctype_value not in candidates else candidates[doctype_value]
+                candidates = candidates.get(doctype_value, None)
         else:
             # Unknown format. Can't parse meta, so bail
             return matched_credentials
@@ -49,7 +51,7 @@ def match_credental(credential, credential_store):
             matched_claim_names = []
 
             # Matching logic is peformed on a per-format basis. This is a bit annoying
-            if format == "mso_mdoc":
+            if _required_in_credential["format"] == "mso_mdoc":
                 for namespace, namespace_val in candidate["namespaces"].items():
                     for attr, attr_val in namespace_val.items():
                         matched_claim_names.append(attr_val["display"])
@@ -64,11 +66,11 @@ def match_credental(credential, credential_store):
                 matched_claim_names = []
 
                 for claim in claims:
-                    claim_values = None if "values" not in claim else claim["values"]
+                    claim_values = claim.get("values", None)
                     # Matching logic is peformed on a per-format basis. This is a bit annoying
-                    if format == "mso_mdoc":
-                        namespace = None if "namespace" not in claim else claim["namespace"]
-                        claim_name = None if "claim_name" not in claim else claim["claim_name"]
+                    if _required_in_credential["format"] == "mso_mdoc":
+                        namespace = claim.get("namespace", None)
+                        claim_name = claim.get("claim_name", None)
                         if namespace is None:
                             raise RuntimeError("namespace missing from an mso-mdoc claim")
                         if claim_name is None:
@@ -95,15 +97,17 @@ def match_credental(credential, credential_store):
                 matched_claim_ids = {}
 
                 for claim in claims:
-                    claim_values = None if "values" not in claim else claim["values"]
-                    claim_id = None if "id" not in claim else claim["id"]
+                    claim_values = claim.get("values", None)
+                    claim_id = claim.get("id", None)
                     if claim_id is None:
-                        raise RuntimeError("claim is missing ID when claim_set is present")
+                        raise RuntimeError(
+                            "claim is missing ID when claim_set is present"
+                        )
 
                     # Matching logic is peformed on a per-format basis. This is a bit annoying
-                    if format == "mso_mdoc":
-                        namespace = None if "namespace" not in claim else claim["namespace"]
-                        claim_name = None if "claim_name" not in claim else claim["claim_name"]
+                    if _required_in_credential["format"] == "mso_mdoc":
+                        namespace = claim.get("namespace", None)
+                        claim_name = claim.get("claim_name", None)
                         if namespace is None:
                             raise RuntimeError("namespace missing from an mso-mdoc claim")
                         if claim_name is None:
@@ -134,18 +138,20 @@ def match_credental(credential, credential_store):
 def dcql_query(query, credential_store):
     matched_credentials = {}
     candidate_matched_credentials = {}
-    credentials = None if "credentials" not in query else query["credentials"]
-    credential_sets = None if "credential_sets" not in query else query["credential_sets"]
+    credentials = query.get("credentials", None)
+    credential_sets = query.get("credential_sets", None)
     if credentials is None:
         raise RuntimeError("credentials missing")
 
     for credential in credentials:
-        id = None if "id" not in credential else credential["id"]
-        if id is None:
+        _required_in_credential["id"] = credential.get("id", None)
+        if _required_in_credential["id"] is None:
             raise RuntimeError("id missing from credential")
         matched = match_credental(credential, credential_store)
         if len(matched) > 0:
-            candidate_matched_credentials[id] = matched
+            candidate_matched_credentials[
+                _required_in_credential["id"]
+            ] = matched
 
     if credential_sets is None:
         if len(credentials) == len(candidate_matched_credentials.keys()):
@@ -155,10 +161,10 @@ def dcql_query(query, credential_store):
         matched_credential_set_optional = {}
         required_count = 0
         for credential_set in credential_sets:
-            options = None if "options" not in credential_set else credential_set["options"]
+            options = credential_set.get("options", None)
             if options is None:
                 raise RuntimeError("options missing from credential_set")
-            required = True if "required" not in credential_set else credential_set["required"]
+            required = credential_set.get("required", True)
             if required:
                 required_count = required_count + 1
             for option in options:
@@ -175,6 +181,6 @@ def dcql_query(query, credential_store):
                             matched_credential_set_optional[m] = candidate_matched_credentials[m]
                     break
         if required_count == len(matched_credential_set.keys()):
-            matched_credentials = matched_credential_set | matched_credential_set_optional
+            matched_credentials = matched_credential_set or matched_credential_set_optional
 
     return matched_credentials

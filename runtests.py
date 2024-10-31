@@ -1,11 +1,24 @@
+import dcql
+
 import json
 import os
+import logging
 
-import dcql
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(levelname)s] %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def get_test_cases(path):
-    return [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)) and f.startswith("testcase")]
+    return [
+        os.path.join(path, f)
+        for f in os.listdir(path)
+        if os.path.isfile(
+            os.path.join(path, f)
+        ) and f.startswith("testcase")
+    ]
 
 
 def load_json(path):
@@ -22,20 +35,23 @@ def get_case_num(case):
 def main():
     test_cases = get_test_cases(os.getcwd())
     test_cases.sort(key=lambda x: get_case_num(x))
-    print(test_cases)
+    # print('\n'.join(test_cases))
+    
     credential_store = load_json("credentials.json")
+
     for test_path in test_cases:
         test = load_json(test_path)
-        print("Running test: {}".format(test["name"]))
+        logger.info(f"Testing {test_path}: {test['name']}")
 
-        matched_credentials = dcql.dcql_query(test["dcql_query"], credential_store["credentials"])
+        matched_credentials = dcql.dcql_query(
+            test["dcql_query"],
+            credential_store["credentials"]
+        )
+        logger.info(f"Matched: {json.dumps(matched_credentials, indent=None)}")
         expected_result = test["expected_result"]["matched_credentials"]
-        print("Matched : {}".format(json.dumps(matched_credentials, indent=None)))
-        if expected_result == matched_credentials:
-            print("PASS")
-        else:
-            print("Expected: {}".format(json.dumps(expected_result)))
-            print("FAIL")
+        
+        if not expected_result == matched_credentials:
+            logger.error(f"[FAIL] Expected: {json.dumps(expected_result)}")
 
 
 if __name__ == "__main__":
