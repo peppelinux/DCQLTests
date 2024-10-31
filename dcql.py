@@ -3,7 +3,36 @@ _required_in_credential = {
     "format": None
 }
 
-def match_credental(credential, credential_store):
+def format_is_mdoc_cbor(claim: dict, candidate: dict):
+    namespace = claim.get("namespace", None)
+    claim_name = claim.get("claim_name", None)
+    claim_values = claim.get("values", None)
+    matched_claim_names = []
+    matched_claim_ids = {}
+
+    claim_id = claim.get("id", None)
+    
+    # Matching logic is peformed on a per-format basis. This is a bit annoying
+    if namespace is None:
+        raise RuntimeError("namespace missing from an mso-mdoc claim")
+    if claim_name is None:
+        raise RuntimeError("claim_name missing from an mso-mdoc claim")
+    if namespace in candidate["namespaces"]:
+        if claim_name in candidate["namespaces"][namespace]:
+            if claim_values is not None:
+                for v in claim_values:
+                    if v == candidate["namespaces"][namespace][claim_name]["value"]:
+                        matched_claim_names.append(candidate["namespaces"][namespace][claim_name]["display"])
+                        if claim_id:
+                            matched_claim_ids[claim_id] = candidate["namespaces"][namespace][claim_name]["display"]
+                        break
+            else:
+                matched_claim_names.append(candidate["namespaces"][namespace][claim_name]["display"])
+
+    return matched_claim_names, matched_claim_ids
+
+
+def match_credential(credential, credential_store):
     matched_credentials = []
 
     for _item in _required_in_credential:
@@ -66,24 +95,8 @@ def match_credental(credential, credential_store):
                 matched_claim_names = []
 
                 for claim in claims:
-                    claim_values = claim.get("values", None)
-                    # Matching logic is peformed on a per-format basis. This is a bit annoying
-                    if _required_in_credential["format"] == "mso_mdoc":
-                        namespace = claim.get("namespace", None)
-                        claim_name = claim.get("claim_name", None)
-                        if namespace is None:
-                            raise RuntimeError("namespace missing from an mso-mdoc claim")
-                        if claim_name is None:
-                            raise RuntimeError("claim_name missing from an mso-mdoc claim")
-                        if namespace in candidate["namespaces"]:
-                            if claim_name in candidate["namespaces"][namespace]:
-                                if claim_values is not None:
-                                    for v in claim_values:
-                                        if v == candidate["namespaces"][namespace][claim_name]["value"]:
-                                            matched_claim_names.append(candidate["namespaces"][namespace][claim_name]["display"])
-                                            break
-                                else:
-                                    matched_claim_names.append(candidate["namespaces"][namespace][claim_name]["display"])
+                    res_matched_claim_names, _ = format_is_mdoc_cbor(claim, candidate)
+                    matched_claim_names.append(res_matched_claim_names)
 
                 matched_credential["matched_claim_names"] = matched_claim_names
 
@@ -97,36 +110,20 @@ def match_credental(credential, credential_store):
                 matched_claim_ids = {}
 
                 for claim in claims:
-                    claim_values = claim.get("values", None)
                     claim_id = claim.get("id", None)
                     if claim_id is None:
                         raise RuntimeError(
                             "claim is missing ID when claim_set is present"
                         )
 
-                    # Matching logic is peformed on a per-format basis. This is a bit annoying
-                    if _required_in_credential["format"] == "mso_mdoc":
-                        namespace = claim.get("namespace", None)
-                        claim_name = claim.get("claim_name", None)
-                        if namespace is None:
-                            raise RuntimeError("namespace missing from an mso-mdoc claim")
-                        if claim_name is None:
-                            raise RuntimeError("claim_name missing from an mso-mdoc claim")
-                        if namespace in candidate["namespaces"]:
-                            if claim_name in candidate["namespaces"][namespace]:
-                                if claim_values is not None:
-                                    for v in claim_values:
-                                        if v == candidate["namespaces"][namespace][claim_name]["value"]:
-                                            matched_claim_ids[claim_id] = candidate["namespaces"][namespace][claim_name]["display"]
-                                            break
-                                else:
-                                    matched_claim_ids[claim_id] = candidate["namespaces"][namespace][claim_name]["display"]
-
+                    _, res_matched_claim_ids = format_is_mdoc_cbor(claim, candidate)
+                    matched_claim_ids.update(res_matched_claim_ids)
+                    
                 for claim_set in claim_sets:
                     matched_claim_names = []
-                    for c in claim_set:
-                        if c in matched_claim_ids:
-                            matched_claim_names.append(matched_claim_ids[c])
+                    for _c in claim_set:
+                        if _c in matched_claim_ids:
+                            matched_claim_names.append(matched_claim_ids[_c])
                     if len(matched_claim_names) == len(claim_set):
                         matched_credential["matched_claim_names"] = matched_claim_names
                         matched_credentials.append(matched_credential)
@@ -147,7 +144,7 @@ def dcql_query(query, credential_store):
         _required_in_credential["id"] = credential.get("id", None)
         if _required_in_credential["id"] is None:
             raise RuntimeError("id missing from credential")
-        matched = match_credental(credential, credential_store)
+        matched = match_credential(credential, credential_store)
         if len(matched) > 0:
             candidate_matched_credentials[
                 _required_in_credential["id"]
