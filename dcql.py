@@ -3,7 +3,7 @@ _required_in_credential = {
     "format": None
 }
 
-def format_is_mdoc_cbor(claim: dict, candidate: dict):
+def format_is_mdoc_cbor(claim: dict, candidate: dict) -> tuple[list, dict]:
     namespace = claim.get("namespace", None)
     claim_name = claim.get("claim_name", None)
     claim_values = claim.get("values", None)
@@ -32,7 +32,7 @@ def format_is_mdoc_cbor(claim: dict, candidate: dict):
     return matched_claim_names, matched_claim_ids
 
 
-def match_credential(credential, credential_store):
+def match_credential(credential, credential_store) -> dict:
     matched_credentials = []
 
     for _item in _required_in_credential:
@@ -132,7 +132,7 @@ def match_credential(credential, credential_store):
     return matched_credentials
 
 
-def dcql_query(query, credential_store):
+def dcql_query(query, credential_store) -> dict:
     matched_credentials = {}
     candidate_matched_credentials = {}
     credentials = query.get("credentials", None)
