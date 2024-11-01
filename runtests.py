@@ -42,7 +42,7 @@ def main():
     for test_path in test_cases:
         test = load_json(test_path)
         logger.info(f"Testing {test_path}: {test['name']}")
-
+        
         matched_credentials = dcql.dcql_query(
             test["dcql_query"],
             credential_store["credentials"]

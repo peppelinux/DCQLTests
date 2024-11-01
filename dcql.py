@@ -181,6 +181,6 @@ def dcql_query(query, credential_store):
                             matched_credential_set_optional[m] = candidate_matched_credentials[m]
                     break
         if required_count == len(matched_credential_set.keys()):
-            matched_credentials = matched_credential_set or matched_credential_set_optional
+            matched_credentials = matched_credential_set | matched_credential_set_optional
 
     return matched_credentials
